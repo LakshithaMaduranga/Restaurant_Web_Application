@@ -29,23 +29,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="index.jsp#services">Services</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#dinein">Dine-In</a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="index.jsp#delivery">Delivery</a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#events">Events</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.jsp">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.jsp">Register</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="payment.jsp">Payment <span class="sr-only">(current)</span></a>
+                    <a class="nav-link btn btn-danger text-white" href="LogoutServlet">Logout</a>
                 </li>
             </ul>
         </div>
@@ -54,7 +44,7 @@
     <!-- Payment Form -->
     <div class="container mt-5">
         <h2 class="text-center">Complete Your Payment</h2>
-        <form action="processPayment" method="post" class="mt-4">
+        <form id="paymentForm" class="mt-4">
             <div class="form-group">
                 <label for="nameOnCard">Name on Card:</label>
                 <input type="text" id="nameOnCard" name="nameOnCard" class="form-control" required>
@@ -79,15 +69,16 @@
                 <button type="submit" class="btn btn-primary">Pay Now</button>
             </div>
         </form>
-
-        <!-- Display success or error message after payment process -->
-        <%
-            String message = request.getParameter("message");
-            if (message != null) {
-                out.println("<p class='text-success text-center mt-3'>" + message + "</p>");
-            }
-        %>
     </div>
+
+    <!-- Alert after payment -->
+    <script>
+        document.getElementById("paymentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            alert("Payment Success! Your payment details have been sent to the admin panel.");
+            window.location.href = "index.jsp";
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="text-muted py-4 bg-light">

@@ -1,137 +1,106 @@
 package com.abcrestaurant.controller;
 
-import com.abcrestaurant.dao.ReservationDAO;
-import com.abcrestaurant.dao.QueryDAO;
-import com.abcrestaurant.model.Reservation;
-import com.abcrestaurant.model.Query;
-import com.abcrestaurant.model.User;
+import com.abcrestaurant.dao.StaffDAO;
+import com.abcrestaurant.model.Staff;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/staff")
+@WebServlet("/StaffServlet")
 public class StaffServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-
-    private ReservationDAO reservationDAO;
-    private QueryDAO queryDAO;
+    private StaffDAO staffDAO;
 
     public void init() {
-        reservationDAO = new ReservationDAO();
-        queryDAO = new QueryDAO();
-    }
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User loggedInUser = (User) session.getAttribute("user");
-
-        // Check if the user is logged in and is a staff member
-        if (loggedInUser == null || !loggedInUser.getRole().equals("Staff")) {
-            response.sendRedirect("login.jsp?error=Unauthorized access. Please log in as a staff member.");
-            return;
-        }
-
-        String action = request.getParameter("action");
-
-        if (action == null) {
-            action = "dashboard";
-        }
-
-        switch (action) {
-            case "manageReservations":
-                listReservations(request, response);
-                break;
-            case "manageQueries":
-                listQueries(request, response);
-                break;
-            case "respondToQuery":
-                showQueryForm(request, response);
-                break;
-            default:
-                response.sendRedirect("staff.jsp");
-                break;
-        }
+        staffDAO = new StaffDAO();
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User loggedInUser = (User) session.getAttribute("user");
-
-        // Check if the user is logged in and is a staff member
-        if (loggedInUser == null || !loggedInUser.getRole().equals("Staff")) {
-            response.sendRedirect("login.jsp?error=Unauthorized access. Please log in as a staff member.");
-            return;
-        }
-
         String action = request.getParameter("action");
 
-        if (action == null) {
-            action = "dashboard";
-        }
-
-        switch (action) {
-            case "updateReservation":
-                updateReservation(request, response);
-                break;
-            case "respondToQuery":
-                respondToQuery(request, response);
-                break;
-            default:
-                response.sendRedirect("staff.jsp");
-                break;
-        }
-    }
-
-    private void listReservations(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Reservation> reservationList = reservationDAO.getAllReservations();
-        request.setAttribute("reservationList", reservationList);
-        request.getRequestDispatcher("manageReservations.jsp").forward(request, response);
-    }
-
-    private void listQueries(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Query> queryList = queryDAO.getAllQueries();
-        request.setAttribute("queryList", queryList);
-        request.getRequestDispatcher("manageQueries.jsp").forward(request, response);
-    }
-
-    private void showQueryForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int queryID = Integer.parseInt(request.getParameter("queryID"));
-        Query query = queryDAO.getQueryById(queryID);
-        request.setAttribute("query", query);
-        request.getRequestDispatcher("respondToQuery.jsp").forward(request, response);
-    }
-
-    private void updateReservation(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int reservationID = Integer.parseInt(request.getParameter("reservationID"));
-        String status = request.getParameter("status");
-
-        Reservation reservation = new Reservation();
-        reservation.setReservationID(reservationID);
-        reservation.setStatus(status);
-
-        boolean isUpdated = reservationDAO.updateReservation(reservation);
-        if (isUpdated) {
-            response.sendRedirect("staff?action=manageReservations&success=Reservation updated successfully.");
-        } else {
-            response.sendRedirect("staff?action=manageReservations&error=Failed to update reservation. Please try again.");
+        try {
+            switch (action) {
+                case "addStaff":
+                    addStaff(request, response);
+                    break;
+                case "updateStaff":
+                    updateStaff(request, response);
+                    break;
+                case "deleteStaff":
+                    deleteStaff(request, response);
+                    break;
+                case "viewStaff":
+                    viewStaff(request, response);
+                    break;
+                default:
+                    listStaff(request, response);
+                    break;
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new ServletException(e);
         }
     }
 
-    private void respondToQuery(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int queryID = Integer.parseInt(request.getParameter("queryID"));
-        String responseMessage = request.getParameter("responseMessage");
+    // Method to add a new staff member
+    private void addStaff(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String contactInfo = request.getParameter("contactInfo");
+        String position = request.getParameter("position");
+        String shift = request.getParameter("shift");
 
-        boolean isResponded = queryDAO.respondToQuery(queryID, responseMessage);
-        if (isResponded) {
-            response.sendRedirect("staff?action=manageQueries&success=Query responded successfully.");
-        } else {
-            response.sendRedirect("respondToQuery.jsp?queryID=" + queryID + "&error=Failed to respond to query. Please try again.");
-        }
+        Staff newStaff = new Staff(0, username, password, email, contactInfo, "Staff", 0, position, shift);
+        staffDAO.addStaff(newStaff);
+
+        response.sendRedirect("staffList.jsp");
+    }
+
+    // Method to update an existing staff member
+    private void updateStaff(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, IOException {
+        int staffID = Integer.parseInt(request.getParameter("staffID"));
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String contactInfo = request.getParameter("contactInfo");
+        String position = request.getParameter("position");
+        String shift = request.getParameter("shift");
+
+        Staff staff = new Staff(staffID, username, password, email, contactInfo, "Staff", staffID, position, shift);
+        staffDAO.updateStaff(staff);
+
+        response.sendRedirect("staffList.jsp");
+    }
+
+    // Method to delete a staff member
+    private void deleteStaff(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, IOException {
+        int staffID = Integer.parseInt(request.getParameter("staffID"));
+        staffDAO.deleteStaff(staffID);
+        response.sendRedirect("staffList.jsp");
+    }
+
+    // Method to view a specific staff member
+    private void viewStaff(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, ServletException, IOException {
+        int staffID = Integer.parseInt(request.getParameter("staffID"));
+        Staff staff = staffDAO.getStaffByID(staffID);
+        request.setAttribute("staff", staff);
+        request.getRequestDispatcher("viewStaff.jsp").forward(request, response);
+    }
+
+    // Method to list all staff members
+    private void listStaff(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, ServletException, IOException {
+        List<Staff> staffList = staffDAO.getAllStaff();
+        request.setAttribute("staffList", staffList);
+        request.getRequestDispatcher("staffList.jsp").forward(request, response);
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doPost(request, response);
     }
 }

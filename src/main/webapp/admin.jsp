@@ -34,9 +34,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="adminDashboard.jsp">Dashboard</a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="manageDishes.jsp">Manage Dishes</a>
                 </li>

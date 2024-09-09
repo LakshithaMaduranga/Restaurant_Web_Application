@@ -1,7 +1,7 @@
 package com.abcrestaurant.controller;
 
-import com.abcrestaurant.dao.UserDAO;
-import com.abcrestaurant.model.User;
+import com.abcrestaurant.dao.RegisterDAO;
+import com.abcrestaurant.model.Register;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,65 +10,58 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/register")
+@WebServlet("/RegisterServlet")
 public class RegisterServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private RegisterDAO registerDAO;
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Retrieve input values from the registration form
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
-        String email = request.getParameter("email");
-        String role = request.getParameter("role");
-        String contactInfo = request.getParameter("contactInfo");
-
-        // Validate the input values
-        if (username == null || username.isEmpty() ||
-            password == null || password.isEmpty() ||
-            confirmPassword == null || confirmPassword.isEmpty() ||
-            email == null || email.isEmpty() ||
-            role == null || role.isEmpty() ||
-            contactInfo == null || contactInfo.isEmpty()) {
-
-            response.sendRedirect("register.jsp?error=All fields are required.");
-            return;
-        }
-
-        // Check if password and confirmPassword match
-        if (!password.equals(confirmPassword)) {
-            response.sendRedirect("register.jsp?error=Passwords do not match.");
-            return;
-        }
-
-        // Check if the username already exists
-        UserDAO userDAO = new UserDAO();
-        if (userDAO.getUserByUsername(username) != null) {
-            response.sendRedirect("register.jsp?error=Username already exists.");
-            return;
-        }
-
-        // Create a new user object
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setPassword(password);  // You should hash the password before storing it in production
-        newUser.setEmail(email);
-        newUser.setRole(role);
-        newUser.setContactInfo(contactInfo);
-
-        // Save the user to the database
-        boolean isRegistered = userDAO.registerUser(newUser);
-
-        // Check if the registration was successful
-        if (isRegistered) {
-            response.sendRedirect("login.jsp?success=Registration successful. Please log in.");
-        } else {
-            response.sendRedirect("register.jsp?error=Registration failed. Please try again.");
-        }
+    public void init() {
+        registerDAO = new RegisterDAO();
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Redirect GET requests to the registration page
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // Get input parameters from registration form
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String contactInfo = request.getParameter("contactInfo");
+        String role = request.getParameter("role");
+
+        // Validate if user already exists
+        try {
+			if (registerDAO.isUserExists(username, email)) {
+			    request.setAttribute("errorMessage", "Username or Email already exists.");
+			    request.getRequestDispatcher("register.jsp").forward(request, response);
+			    return;
+			}
+		} catch (ClassNotFoundException | ServletException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        // Create new user object
+        Register newUser = new Register(username, password, email, contactInfo, role);
+
+        // Register the user
+        try {
+			if (registerDAO.registerUser(newUser)) {
+			    // If registration successful, redirect to login page
+			    response.sendRedirect("login.jsp?success=Registration Successful. Please log in.");
+			} else {
+			    // If registration failed, send error message back to registration page
+			    request.setAttribute("errorMessage", "An error occurred while registering. Please try again.");
+			    request.getRequestDispatcher("register.jsp").forward(request, response);
+			}
+		} catch (ClassNotFoundException | IOException | ServletException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         response.sendRedirect("register.jsp");
     }
 }

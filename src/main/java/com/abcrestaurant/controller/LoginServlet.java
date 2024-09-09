@@ -1,7 +1,7 @@
 package com.abcrestaurant.controller;
 
-import com.abcrestaurant.dao.UserDAO;
-import com.abcrestaurant.model.User;
+import com.abcrestaurant.dao.LoginDAO;
+import com.abcrestaurant.model.Login;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,29 +13,61 @@ import java.io.IOException;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private LoginDAO loginDAO;
+
+    public void init() {
+        loginDAO = new LoginDAO();
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // Retrieve the username and password from the form
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        UserDAO userDAO = new UserDAO();
-        User user = userDAO.authenticateUser(username, password);
+        Login login = new Login(username, password);
 
-        if (user != null) {
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            session.setAttribute("role", user.getRole());
+        try {
+            if (loginDAO.authenticateUser(login)) {
+                // If login is successful, retrieve the user's role
+                String role = loginDAO.getUserRole(username);
 
-            // Redirect based on user role
-            if ("Admin".equals(user.getRole())) {
-                response.sendRedirect("adminDashboard.jsp");
-            } else if ("Staff".equals(user.getRole())) {
-                response.sendRedirect("staffDashboard.jsp");
+                // Create a session and store the username and role
+                HttpSession session = request.getSession();
+                session.setAttribute("username", username);
+                session.setAttribute("role", role);
+
+                // Redirect to the appropriate dashboard based on the role
+                switch (role) {
+                    case "Admin":
+                        response.sendRedirect("adminDashboard.jsp");
+                        break;
+                    case "Staff":
+                        response.sendRedirect("staffDashboard.jsp");
+                        break;
+                    case "Customer":
+                        response.sendRedirect("customerDashboard.jsp");
+                        break;
+                    default:
+                        session.invalidate();
+                        request.setAttribute("errorMessage", "Invalid user role.");
+                        request.getRequestDispatcher("login.jsp").forward(request, response);
+                }
             } else {
-                response.sendRedirect("customerDashboard.jsp");
+                // If login fails, set an error message and redirect to login page
+                request.setAttribute("errorMessage", "Invalid username or password.");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
             }
-        } else {
-            // Authentication failed, redirect back to login page with an error message
-            response.sendRedirect("login.jsp?error=Invalid username or password");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "An error occurred during login. Please try again.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.sendRedirect("login.jsp");
     }
 }

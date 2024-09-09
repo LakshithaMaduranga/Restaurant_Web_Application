@@ -1,103 +1,85 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Users - Admin Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .table thead th {
-            background-color: #343a40;
-            color: #ffffff;
-        }
-        .btn-primary, .btn-success, .btn-danger {
-            margin-right: 10px;
-        }
-        .modal-header {
-            background-color: #343a40;
-            color: #ffffff;
-        }
-    </style>
+    <title>Manage Users</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
 
-    <div class="container mt-5">
-        <h1 class="text-center">Manage Users</h1>
-        <p class="text-center">View, add, edit, or delete users from the system.</p>
-        <div class="text-right mb-3">
-            <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">Add New User</button>
-        </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">ABC Restaurant</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="index.jsp">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="ManageUserServlet?action=list">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="about.jsp">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="contact.jsp">Contact</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
-        <table class="table table-bordered">
-            <thead>
+<!-- Main Content -->
+<div class="container mt-5">
+    <h2 class="text-center">Manage Users</h2>
+
+    <!-- Add New User Button -->
+    <div class="text-right mb-3">
+        <a href="ManageUserServlet?action=new" class="btn btn-primary">Add New User</a>
+    </div>
+
+    <!-- Users Table -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Contact Info</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through the users list -->
+            <c:forEach var="user" items="${users}">
                 <tr>
-                    <th>User ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Example Row -->
-                <tr>
-                    <td>1</td>
-                    <td>john_doe</td>
-                    <td>john@example.com</td>
-                    <td>Admin</td>
+                    <td>${user.userID}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.contactInfo}</td>
                     <td>
-                        <button class="btn btn-success">Edit</button>
-                        <button class="btn btn-danger">Delete</button>
+                        <!-- Edit Button -->
+                        <a href="ManageUserServlet?action=edit&userID=${user.userID}" class="btn btn-success">Edit</a>
+                        <!-- Delete Button -->
+                        <a href="ManageUserServlet?action=delete&userID=${user.userID}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
                     </td>
                 </tr>
-                <!-- Repeat for each user -->
-            </tbody>
-        </table>
-    </div>
+            </c:forEach>
+        </tbody>
+    </table>
+</div>
 
-    <!-- Add User Modal -->
-    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" placeholder="Enter username">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="Enter email">
-                        </div>
-                        <div class="form-group">
-                            <label for="role">Role</label>
-                            <select class="form-control" id="role">
-                                <option>Admin</option>
-                                <option>Staff</option>
-                                <option>Customer</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Enter password">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add User</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Bootstrap JS, Popper.js, and jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

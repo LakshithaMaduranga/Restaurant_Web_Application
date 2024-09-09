@@ -11,7 +11,7 @@
             background-color: #343a40;
             color: #ffffff;
         }
-        .btn-primary, .btn-success, .btn-danger {
+        .btn-primary, .btn-success {
             margin-right: 5px;
         }
         .status-filter {
@@ -91,7 +91,6 @@
                     <td>
                         <a href="viewReservationDetails.jsp?reservationID=2024-01" class="btn btn-info btn-sm">View</a>
                         <a href="updateReservation.jsp?reservationID=2024-01" class="btn btn-success btn-sm">Confirm</a>
-                        <a href="cancelReservation.jsp?reservationID=2024-01" class="btn btn-danger btn-sm">Cancel</a>
                     </td>
                 </tr>
                 <!-- Repeat for each reservation -->
@@ -107,6 +106,6 @@
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.amazonaws.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

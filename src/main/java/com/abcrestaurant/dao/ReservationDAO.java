@@ -7,44 +7,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationDAO {
-
-    // Method to add a new reservation
-    public boolean addReservation(Reservation reservation) {
-        boolean rowInserted = false;
-        String sql = "INSERT INTO Reservations (userID, customerName, date, time, status) VALUES (?, ?, ?, ?, ?)";
-
-        try (Connection connection = DBConnection.initializeDatabase();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, reservation.getUserID());
-            statement.setString(2, reservation.getCustomerName());
-            statement.setDate(3, java.sql.Date.valueOf(reservation.getDate()));
-            statement.setTime(4, java.sql.Time.valueOf(reservation.getTime()));
-            statement.setString(5, reservation.getStatus());
-
-            rowInserted = statement.executeUpdate() > 0;
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return rowInserted;
-    }
-
-    // Method to delete a reservation by ID
-    public boolean deleteReservation(int reservationID) {
+    // Method to cancel a reservation
+    public boolean cancelReservation(int reservationID) {
         boolean rowDeleted = false;
-        String sql = "DELETE FROM Reservations WHERE reservationID = ?";
+        String sql = "DELETE FROM Reservations WHERE reservationID = ?"; // Assuming reservations are deleted to cancel them
 
         try (Connection connection = DBConnection.initializeDatabase();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, reservationID);
-
             rowDeleted = statement.executeUpdate() > 0;
 
         } catch (SQLException | ClassNotFoundException e) {
@@ -54,83 +31,82 @@ public class ReservationDAO {
         return rowDeleted;
     }
 
-    // Method to retrieve a reservation by ID
-    public Reservation getReservationById(int reservationID) {
-        Reservation reservation = null;
-        String sql = "SELECT * FROM Reservations WHERE reservationID = ?";
-
+    // Method to add a new reservation
+    public void addReservation(Reservation reservation) throws SQLException, ClassNotFoundException {
+        String sql = "INSERT INTO Reservations (customerName, date, time, status) VALUES (?, ?, ?, ?)";
         try (Connection connection = DBConnection.initializeDatabase();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, reservationID);
-
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                reservation = new Reservation();
-                reservation.setReservationID(resultSet.getInt("reservationID"));
-                reservation.setUserID(resultSet.getInt("userID"));
-                reservation.setCustomerName(resultSet.getString("customerName"));
-                reservation.setDate(resultSet.getDate("date").toLocalDate());
-                reservation.setTime(resultSet.getTime("time").toLocalTime());
-                reservation.setStatus(resultSet.getString("status"));
-            }
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return reservation;
-    }
-
-    // Method to update a reservation
-    public boolean updateReservation(Reservation reservation) {
-        boolean rowUpdated = false;
-        String sql = "UPDATE Reservations SET customerName = ?, date = ?, time = ?, status = ? WHERE reservationID = ?";
-
-        try (Connection connection = DBConnection.initializeDatabase();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setString(1, reservation.getCustomerName());
             statement.setDate(2, java.sql.Date.valueOf(reservation.getDate()));
             statement.setTime(3, java.sql.Time.valueOf(reservation.getTime()));
             statement.setString(4, reservation.getStatus());
-            statement.setInt(5, reservation.getReservationID());
-
-            rowUpdated = statement.executeUpdate() > 0;
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            statement.executeUpdate();
         }
-
-        return rowUpdated;
     }
 
     // Method to retrieve all reservations
-    public List<Reservation> getAllReservations() {
+    public List<Reservation> getAllReservations() throws SQLException, ClassNotFoundException {
         List<Reservation> reservations = new ArrayList<>();
         String sql = "SELECT * FROM Reservations";
-
         try (Connection connection = DBConnection.initializeDatabase();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                Reservation reservation = new Reservation();
-                reservation.setReservationID(resultSet.getInt("reservationID"));
-                reservation.setUserID(resultSet.getInt("userID"));
-                reservation.setCustomerName(resultSet.getString("customerName"));
-                reservation.setDate(resultSet.getDate("date").toLocalDate());
-                reservation.setTime(resultSet.getTime("time").toLocalTime());
-                reservation.setStatus(resultSet.getString("status"));
+                int id = resultSet.getInt("reservationID");
+                String customerName = resultSet.getString("customerName");
+                LocalDate date = resultSet.getDate("date").toLocalDate();
+                LocalTime time = resultSet.getTime("time").toLocalTime();
+                String status = resultSet.getString("status");
 
-                reservations.add(reservation);
+                reservations.add(new Reservation(id, customerName, date, time, status));
             }
-
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
         }
-
         return reservations;
+    }
+
+    // Method to retrieve a reservation by ID
+    public Reservation getReservationById(int reservationID) throws SQLException, ClassNotFoundException {
+        Reservation reservation = null;
+        String sql = "SELECT * FROM Reservations WHERE reservationID = ?";
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, reservationID);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String customerName = resultSet.getString("customerName");
+                    LocalDate date = resultSet.getDate("date").toLocalDate();
+                    LocalTime time = resultSet.getTime("time").toLocalTime();
+                    String status = resultSet.getString("status");
+
+                    reservation = new Reservation(reservationID, customerName, date, time, status);
+                }
+            }
+        }
+        return reservation;
+    }
+
+    // Method to update a reservation
+    public void updateReservation(Reservation reservation) throws SQLException, ClassNotFoundException {
+        String sql = "UPDATE Reservations SET customerName = ?, date = ?, time = ?, status = ? WHERE reservationID = ?";
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, reservation.getCustomerName());
+            statement.setDate(2, java.sql.Date.valueOf(reservation.getDate()));
+            statement.setTime(3, java.sql.Time.valueOf(reservation.getTime()));
+            statement.setString(4, reservation.getStatus());
+            statement.setInt(5, reservation.getReservationID());
+            statement.executeUpdate();
+        }
+    }
+
+    // Method to delete a reservation
+    public void deleteReservation(int reservationID) throws SQLException, ClassNotFoundException {
+        String sql = "DELETE FROM Reservations WHERE reservationID = ?";
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, reservationID);
+            statement.executeUpdate();
+        }
     }
 }

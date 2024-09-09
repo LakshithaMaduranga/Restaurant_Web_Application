@@ -11,10 +11,10 @@ public class DBConnection {
         // MySQL connection URL
         String dbURL = "jdbc:mysql://localhost:3306/";
         // Database name
-        String dbName = "abc_restaurent_01";
+        String dbName = "abc_restaurant_04";
         // Database credentials
         String dbUsername = "root"; 
-        String dbPassword = "CAmit54@23L78"; 
+        String dbPassword = "GAmit54@23L78"; 
 
         // Load the MySQL JDBC driver
         Class.forName(dbDriver);

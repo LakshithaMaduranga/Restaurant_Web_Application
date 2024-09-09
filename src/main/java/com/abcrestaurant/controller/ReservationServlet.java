@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -63,7 +64,13 @@ public class ReservationServlet extends HttpServlet {
     }
 
     private void listReservations(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Reservation> reservationList = reservationDAO.getAllReservations();
+        List<Reservation> reservationList = null;
+		try {
+			reservationList = reservationDAO.getAllReservations();
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         request.setAttribute("reservationList", reservationList);
         request.getRequestDispatcher("manageReservations.jsp").forward(request, response);
     }
@@ -74,7 +81,13 @@ public class ReservationServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int reservationID = Integer.parseInt(request.getParameter("reservationID"));
-        Reservation existingReservation = reservationDAO.getReservationById(reservationID);
+        Reservation existingReservation = null;
+		try {
+			existingReservation = reservationDAO.getReservationById(reservationID);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         request.setAttribute("reservation", existingReservation);
         request.getRequestDispatcher("reservationForm.jsp").forward(request, response);
     }
@@ -86,7 +99,12 @@ public class ReservationServlet extends HttpServlet {
         String status = request.getParameter("status");
 
         Reservation newReservation = new Reservation(customerName, date, time, status);
-        reservationDAO.addReservation(newReservation);
+        try {
+			reservationDAO.addReservation(newReservation);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         response.sendRedirect("reservation?action=list&success=Reservation added successfully.");
     }
 
@@ -98,13 +116,23 @@ public class ReservationServlet extends HttpServlet {
         String status = request.getParameter("status");
 
         Reservation reservation = new Reservation(reservationID, customerName, date, time, status);
-        reservationDAO.updateReservation(reservation);
+        try {
+			reservationDAO.updateReservation(reservation);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         response.sendRedirect("reservation?action=list&success=Reservation updated successfully.");
     }
 
     private void deleteReservation(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int reservationID = Integer.parseInt(request.getParameter("reservationID"));
-        reservationDAO.deleteReservation(reservationID);
+        try {
+			reservationDAO.deleteReservation(reservationID);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         response.sendRedirect("reservation?action=list&success=Reservation deleted successfully.");
     }
 }

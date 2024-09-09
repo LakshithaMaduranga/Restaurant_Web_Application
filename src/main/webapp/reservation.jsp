@@ -1,62 +1,84 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Make a Reservation - ABC Restaurant</title>
+    <title>Reservation - ABC Restaurant</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"> <!-- FontAwesome for icons -->
+    <style>
+        /* Navbar Styling */
+        .navbar {
+            background-color: #2c3e50;
+            padding-top: 8px;  /* Adjust the top padding */
+            padding-bottom: 8px; /* Adjust the bottom padding */
+        }
+
+        .navbar-brand, .nav-link {
+            color: #ecf0f1 !important;
+        }
+
+        .navbar-brand span {
+            color: #e74c3c;
+        }
+
+        .navbar-nav .nav-item .nav-link:hover {
+            color: #e74c3c !important;
+        }
+
+        .cart-icon .badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+        }
+
+        /* Adjust margin to avoid overlap */
+        .container {
+            margin-top: 70px;  /* Adjust to match the reduced navbar height */
+        }
+
+    </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="index.jsp">ABC Restaurant</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#about">About Us</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#gallery">Gallery</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#services">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#dinein">Dine-In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#delivery">Delivery</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="index.jsp#events">Events</a>
-                </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="reservation.jsp">Make a Reservation <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="login.jsp">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="register.jsp">Register</a>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">ABC <span>Restaurant</span></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="delivery.jsp">Delivery</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="reservation.jsp">Reservation <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="query.jsp">Query</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon position-relative" href="cart.jsp">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge badge-danger">
+                                <%= session.getAttribute("cartItemCount") != null ? session.getAttribute("cartItemCount") : 0 %>
+                            </span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger text-white ml-2" href="LogoutServlet">Logout</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
     <!-- Reservation Form -->
-    <div class="container mt-5">
-        <div class="row justify-content-center">
+    <div class="container">
+     <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -121,12 +143,7 @@
     <!-- Footer -->
     <footer class="text-muted py-4 bg-light">
         <div class="container">
-            <p class="mb-1">Â© 2024 ABC Restaurant. All rights reserved.</p>
-            <ul class="list-inline">
-                <li class="list-inline-item"><a href="#">Privacy</a></li>
-                <li class="list-inline-item"><a href="#">Terms</a></li>
-                <li class="list-inline-item"><a href="#">Contact</a></li>
-            </ul>
+            <p class="mb-1">© 2024 ABC Restaurant. All rights reserved.</p>
         </div>
     </footer>
 
@@ -134,5 +151,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 </body>
 </html>

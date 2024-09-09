@@ -1,49 +1,43 @@
 package com.abcrestaurant.model;
 
 public class Admin extends User {
-
-    // Constructor
+    
+    // Constructor with default values
     public Admin() {
-        super(); // Call the parent class (User) constructor
+        super();
     }
 
+    // Constructor to initialize admin with specific values
     public Admin(int userID, String username, String password, String email, String contactInfo, String role) {
-        super(userID, username, password, email, contactInfo, role); // Call the parent class constructor
+        super(userID, username, password, email, contactInfo, role); // Call parent class (User) constructor
     }
 
     // Admin-specific methods
-
-    // Method to manage dishes in the restaurant's menu
     public void manageDishes() {
-        // Logic to add, edit, and remove dishes from the menu
-        System.out.println("Managing dishes...");
+        // Implement logic for managing dishes (add/edit/remove)
+        System.out.println("Admin is managing dishes.");
     }
 
-    // Method to manage user accounts
     public void manageUsers() {
-        // Logic to view, promote, and manage user accounts
-        System.out.println("Managing users...");
+        // Implement logic for managing users
+        System.out.println("Admin is managing users.");
     }
 
-    // Method to manage customer orders
     public void manageOrders() {
-        // Logic to monitor and manage customer orders
-        System.out.println("Managing orders...");
+        // Implement logic for managing orders
+        System.out.println("Admin is managing orders.");
     }
 
-    // Method to view and analyze reports
     public void viewReports() {
-        // Logic to analyze sales and customer data
-        System.out.println("Viewing reports...");
+        // Implement logic to view sales, customer, and order reports
+        System.out.println("Admin is viewing reports.");
     }
 
-    // Method to configure system settings
-    public void systemSettings() {
-        // Logic to configure system settings and preferences
-        System.out.println("Configuring system settings...");
+    public void configureSettings() {
+        // Implement logic to manage system settings
+        System.out.println("Admin is configuring system settings.");
     }
 
-    // Override toString() method for better output readability
     @Override
     public String toString() {
         return "Admin{" +

@@ -1,22 +1,26 @@
 package com.abcrestaurant.model;
 
 public class Customer extends User {
+    
     private int customerID;
-    private String name;
+    private String address;
+    private String phoneNumber;
 
-    // Constructor
+    // Default constructor
     public Customer() {
-        super(); // Call the parent class (User) constructor
+        super();
     }
 
-    // Parameterized constructor with userID and other parameters
-    public Customer(int userID, String username, String password, String email, String contactInfo, String role, int customerID, String name) {
-        super(userID, username, password, email, contactInfo, role); // Call the parent class (User) constructor with parameters
+    // Constructor to initialize Customer attributes
+    public Customer(int userID, String username, String password, String email, String contactInfo, String role, 
+                    int customerID, String address, String phoneNumber) {
+        super(userID, username, password, email, contactInfo, role);
         this.customerID = customerID;
-        this.name = name;
+        this.address = address;
+        this.phoneNumber = phoneNumber;
     }
 
-    // Getters and Setters
+    // Getters and setters
     public int getCustomerID() {
         return customerID;
     }
@@ -25,36 +29,48 @@ public class Customer extends User {
         this.customerID = customerID;
     }
 
-    public String getName() {
-        return name;
+    public String getAddress() {
+        return address;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    // Additional methods specific to Customer
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    // Additional methods specific to customer
     public void makeReservation() {
-        // Implement reservation logic here
+        // Logic for making a reservation
+        System.out.println("Customer is making a reservation.");
+    }
+
+    public void placeOrder() {
+        // Logic for placing an order
+        System.out.println("Customer is placing an order.");
     }
 
     public void submitQuery() {
-        // Implement query submission logic here
-    }
-
-    public void searchServices() {
-        // Implement service search logic here
+        // Logic for submitting a query
+        System.out.println("Customer is submitting a query.");
     }
 
     @Override
     public String toString() {
         return "Customer{" +
                 "customerID=" + customerID +
-                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", username='" + getUsername() + '\'' +
                 ", email='" + getEmail() + '\'' +
-                ", role='" + getRole() + '\'' +
                 ", contactInfo='" + getContactInfo() + '\'' +
+                ", role='" + getRole() + '\'' +
                 '}';
     }
 }

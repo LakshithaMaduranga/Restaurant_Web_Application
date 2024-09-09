@@ -1,6 +1,8 @@
 package com.abcrestaurant.dao;
 
 import com.abcrestaurant.model.Admin;
+import com.abcrestaurant.util.DBConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,35 +12,21 @@ import java.util.List;
 
 public class AdminDAO {
 
-    private Connection connection;
-
-    public AdminDAO(Connection connection) {
-        this.connection = connection;
-    }
-
-    // Create a new Admin
-    public boolean addAdmin(Admin admin) throws SQLException {
-        String query = "INSERT INTO Admins (username, password, email, contactInfo, role) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, admin.getUsername());
-            statement.setString(2, admin.getPassword());
-            statement.setString(3, admin.getEmail());
-            statement.setString(4, admin.getContactInfo());
-            statement.setString(5, admin.getRole());
-
-            return statement.executeUpdate() > 0;
-        }
-    }
-
-    // Get an Admin by ID
-    public Admin getAdminById(int adminId) throws SQLException {
-        String query = "SELECT * FROM Admins WHERE userID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, adminId);
+    // Retrieve admin by username and password (used for login)
+    public Admin authenticateAdmin(String username, String password) throws SQLException, ClassNotFoundException {
+        Admin admin = null;
+        String query = "SELECT * FROM Users WHERE username = ? AND password = ? AND role = 'Admin'";
+        
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+             
+            statement.setString(1, username);
+            statement.setString(2, password);
+            
             ResultSet resultSet = statement.executeQuery();
-
+            
             if (resultSet.next()) {
-                return new Admin(
+                admin = new Admin(
                         resultSet.getInt("userID"),
                         resultSet.getString("username"),
                         resultSet.getString("password"),
@@ -48,39 +36,19 @@ public class AdminDAO {
                 );
             }
         }
-        return null;
+        return admin;
     }
 
-    // Update an existing Admin
-    public boolean updateAdmin(Admin admin) throws SQLException {
-        String query = "UPDATE Admins SET username = ?, password = ?, email = ?, contactInfo = ?, role = ? WHERE userID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, admin.getUsername());
-            statement.setString(2, admin.getPassword());
-            statement.setString(3, admin.getEmail());
-            statement.setString(4, admin.getContactInfo());
-            statement.setString(5, admin.getRole());
-            statement.setInt(6, admin.getUserID());
-
-            return statement.executeUpdate() > 0;
-        }
-    }
-
-    // Delete an Admin by ID
-    public boolean deleteAdmin(int adminId) throws SQLException {
-        String query = "DELETE FROM Admins WHERE userID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, adminId);
-            return statement.executeUpdate() > 0;
-        }
-    }
-
-    // Get all Admins
-    public List<Admin> getAllAdmins() throws SQLException {
-        String query = "SELECT * FROM Admins";
+    // Method to retrieve all admins
+    public List<Admin> getAllAdmins() throws SQLException, ClassNotFoundException {
         List<Admin> admins = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        String query = "SELECT * FROM Users WHERE role = 'Admin'";
+        
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+             
             ResultSet resultSet = statement.executeQuery();
+            
             while (resultSet.next()) {
                 Admin admin = new Admin(
                         resultSet.getInt("userID"),
@@ -94,5 +62,34 @@ public class AdminDAO {
             }
         }
         return admins;
+    }
+
+    // Update admin details
+    public void updateAdmin(Admin admin) throws SQLException, ClassNotFoundException {
+        String query = "UPDATE Users SET username = ?, password = ?, email = ?, contactInfo = ? WHERE userID = ?";
+        
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+             
+            statement.setString(1, admin.getUsername());
+            statement.setString(2, admin.getPassword());
+            statement.setString(3, admin.getEmail());
+            statement.setString(4, admin.getContactInfo());
+            statement.setInt(5, admin.getUserID());
+            
+            statement.executeUpdate();
+        }
+    }
+
+    // Delete admin by ID
+    public void deleteAdmin(int userID) throws SQLException, ClassNotFoundException {
+        String query = "DELETE FROM Users WHERE userID = ?";
+        
+        try (Connection connection = DBConnection.initializeDatabase();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+             
+            statement.setInt(1, userID);
+            statement.executeUpdate();
+        }
     }
 }

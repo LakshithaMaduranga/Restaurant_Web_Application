@@ -3,23 +3,31 @@ package com.abcrestaurant.model;
 public class User {
     private int userID;
     private String username;
-    private String password;
     private String email;
-    private String contactInfo;
     private String role;
+    private String password;
+    private String contactInfo;
 
-    // No-argument constructor
-    public User() {
-    }
+    // Default constructor
+    public User() {}
 
-    // Parameterized constructor
-    public User(int userID, String username, String password, String email, String contactInfo, String role) {
+    // Constructor with userID (for update operations)
+    public User(int userID, String username, String email, String role, String password, String contactInfo) {
         this.userID = userID;
         this.username = username;
-        this.password = password;
         this.email = email;
-        this.contactInfo = contactInfo;
         this.role = role;
+        this.password = password;
+        this.contactInfo = contactInfo;
+    }
+
+    // Constructor without userID (for insert operations)
+    public User(String username, String email, String role, String password, String contactInfo) {
+        this.username = username;
+        this.email = email;
+        this.role = role;
+        this.password = password;
+        this.contactInfo = contactInfo;
     }
 
     // Getters and setters
@@ -39,14 +47,6 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -55,19 +55,27 @@ public class User {
         this.email = email;
     }
 
-    public String getContactInfo() {
-        return contactInfo;
-    }
-
-    public void setContactInfo(String contactInfo) {
-        this.contactInfo = contactInfo;
-    }
-
     public String getRole() {
         return role;
     }
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(String contactInfo) {
+        this.contactInfo = contactInfo;
     }
 }

@@ -1,134 +1,93 @@
 package com.abcrestaurant.controller;
 
-import com.abcrestaurant.dao.UserDAO;
-import com.abcrestaurant.model.User;
+import com.abcrestaurant.dao.AdminDAO;
+import com.abcrestaurant.model.Admin;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/admin")
+@WebServlet("/AdminServlet")
 public class AdminServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-
-    private UserDAO userDAO;
+    private AdminDAO adminDAO;
 
     public void init() {
-        userDAO = new UserDAO();
-    }
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User loggedInUser = (User) session.getAttribute("user");
-
-        // Check if the user is logged in and is an admin
-        if (loggedInUser == null || !loggedInUser.getRole().equals("Admin")) {
-            response.sendRedirect("login.jsp?error=Unauthorized access. Please log in as an admin.");
-            return;
-        }
-
-        String action = request.getParameter("action");
-
-        if (action == null) {
-            action = "dashboard";
-        }
-
-        switch (action) {
-            case "dashboard":
-                showDashboard(request, response);
-                break;
-            case "manageUsers":
-                listUsers(request, response);
-                break;
-            case "editUser":
-                showEditForm(request, response);
-                break;
-            case "deleteUser":
-                deleteUser(request, response);
-                break;
-            default:
-                showDashboard(request, response);
-                break;
-        }
+        adminDAO = new AdminDAO();
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User loggedInUser = (User) session.getAttribute("user");
-
-        // Check if the user is logged in and is an admin
-        if (loggedInUser == null || !loggedInUser.getRole().equals("Admin")) {
-            response.sendRedirect("login.jsp?error=Unauthorized access. Please log in as an admin.");
-            return;
-        }
-
         String action = request.getParameter("action");
 
-        if (action == null) {
-            action = "dashboard";
+        try {
+            switch (action) {
+                case "login":
+                    authenticateAdmin(request, response);
+                    break;
+                case "updateAdmin":
+                    updateAdmin(request, response);
+                    break;
+                case "deleteAdmin":
+                    deleteAdmin(request, response);
+                    break;
+                case "viewAdmins":
+                    viewAdmins(request, response);
+                    break;
+                default:
+                    response.sendRedirect("adminDashboard.jsp");
+                    break;
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new ServletException(e);
         }
+    }
 
-        switch (action) {
-            case "updateUser":
-                updateUser(request, response);
-                break;
-            default:
-                showDashboard(request, response);
-                break;
+    private void authenticateAdmin(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        Admin admin = adminDAO.authenticateAdmin(username, password);
+
+        if (admin != null) {
+            request.getSession().setAttribute("currentAdmin", admin);
+            response.sendRedirect("adminDashboard.jsp");
+        } else {
+            request.setAttribute("errorMessage", "Invalid credentials!");
+            request.getRequestDispatcher("adminLogin.jsp").forward(request, response);
         }
     }
 
-    private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("admin.jsp").forward(request, response);
-    }
-
-    private void listUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<User> userList = userDAO.getAllUsers();
-        request.setAttribute("userList", userList);
-        request.getRequestDispatcher("manageUsers.jsp").forward(request, response);
-    }
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int userID = Integer.parseInt(request.getParameter("userID"));
-        User existingUser = userDAO.getUserById(userID);
-        request.setAttribute("user", existingUser);
-        request.getRequestDispatcher("editUser.jsp").forward(request, response);
-    }
-
-    private void updateUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void updateAdmin(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, IOException {
         int userID = Integer.parseInt(request.getParameter("userID"));
         String username = request.getParameter("username");
+        String password = request.getParameter("password");
         String email = request.getParameter("email");
-        String role = request.getParameter("role");
         String contactInfo = request.getParameter("contactInfo");
 
-        User user = new User();
-        user.setUserID(userID);
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setRole(role);
-        user.setContactInfo(contactInfo);
+        Admin admin = new Admin(userID, username, password, email, contactInfo, "Admin");
+        adminDAO.updateAdmin(admin);
 
-        boolean isUpdated = userDAO.updateUser(user);
-        if (isUpdated) {
-            response.sendRedirect("admin?action=manageUsers&success=User updated successfully.");
-        } else {
-            response.sendRedirect("editUser.jsp?userID=" + userID + "&error=Failed to update user. Please try again.");
-        }
+        response.sendRedirect("viewAdmins.jsp");
     }
 
-    private void deleteUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void deleteAdmin(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, IOException {
         int userID = Integer.parseInt(request.getParameter("userID"));
-        boolean isDeleted = userDAO.deleteUser(userID);
-        if (isDeleted) {
-            response.sendRedirect("admin?action=manageUsers&success=User deleted successfully.");
-        } else {
-            response.sendRedirect("admin?action=manageUsers&error=Failed to delete user. Please try again.");
-        }
+        adminDAO.deleteAdmin(userID);
+        response.sendRedirect("viewAdmins.jsp");
+    }
+
+    private void viewAdmins(HttpServletRequest request, HttpServletResponse response) throws SQLException, ClassNotFoundException, ServletException, IOException {
+        List<Admin> admins = adminDAO.getAllAdmins();
+        request.setAttribute("adminList", admins);
+        request.getRequestDispatcher("viewAdmins.jsp").forward(request, response);
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doPost(request, response);
     }
 }
